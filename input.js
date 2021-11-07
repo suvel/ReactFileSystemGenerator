@@ -1,5 +1,5 @@
-module.exports = `@@start@@
-MainContainer
-    Text
-    Button
-@@end@@`;
+module.exports = `MainContainer
+[
+Text
+Button
+]`;
