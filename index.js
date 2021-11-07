@@ -1,10 +1,6 @@
-console.log("___ File System Generator___" + "\n\n");
+var input = require("./input.js");
 
-var ip = require("./input.js");
-
-console.log("input to be processed" + "\n\n" + ip);
-
-var fileSystemMap = [];
+var rootFileSystemMap = [];
 
 const getDefaultFileSystem = (folderName) => {
   return {
@@ -24,8 +20,12 @@ const getComponentObject = (fSystem, folderName) => {
 };
 
 const addFolder = (fSystem, folderName, newFolder) => {
-  const isRoot = fSystem?.length === 0;
-  if (isRoot) {
+  const isRoot = fSystem === rootFileSystemMap;
+  let isAvailable = false;
+  if (fSystem.length > 0) {
+    isAvailable = fSystem?.some((data) => data.folderName === folderName);
+  }
+  if (isRoot && !isAvailable) {
     // when the file system is empty
     fSystem.push(newFolder);
   } else {
@@ -39,9 +39,9 @@ const addFiles = (fSystem, folderName, fileName) => {
   folderToUpdate.files.push(fileName);
 };
 
-const fileSystemLines = ip.split("\n");
+const fileSystemInstructions = input.split("\n");
 
-let currentCursor = fileSystemMap;
+let currentCursor = rootFileSystemMap;
 let previousFolderName = undefined;
 
 let insideSubComponent = false;
@@ -60,8 +60,8 @@ const checkIsKeywordAndInsideSubComponent = (string) => {
 
 const subFolderName = "subComponent";
 
-fileSystemLines.forEach((line, index) => {
-  const string = line.trim();
+fileSystemInstructions.forEach((InstructionLine) => {
+  const string = InstructionLine.trim();
   const { isKeyword, insideSubComponent } =
     checkIsKeywordAndInsideSubComponent(string);
 
@@ -69,13 +69,14 @@ fileSystemLines.forEach((line, index) => {
 
   if (isKeyword) {
     if (insideSubComponent) {
-      const component = getDefaultFileSystem(subFolderName);
-      addFolder(currentCursor, previousFolderName, component);
-      currentCursor = component;
+      const subComponentFileSystem = getDefaultFileSystem(subFolderName);
+      addFolder(currentCursor, previousFolderName, subComponentFileSystem);
+      currentCursor = subComponentFileSystem;
     } else {
-      currentCursor = fileSystemMap;
+      currentCursor = rootFileSystemMap;
     }
   }
+
   if (!isKeyword) {
     if (insideSubComponent) {
       const component = getDefaultFileSystem(folderName);
@@ -95,5 +96,5 @@ fileSystemLines.forEach((line, index) => {
 });
 
 console.log("File System" + "\n\n");
-console.log(JSON.stringify(fileSystemMap, "", 2));
+console.log(JSON.stringify(rootFileSystemMap, "", 2));
 console.log("\n\n");
